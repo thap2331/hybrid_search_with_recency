@@ -7,8 +7,8 @@
 ## Create vector extension
 - Option 1:
     - ```sh
-        docker exec -it pg_container psql -U postgres -d vectordb -c "CREATE EXTENSION IF NOT EXISTS vector;"
-        ```
+    docker exec -it pg_container psql -U postgres -d vectordb -c "CREATE EXTENSION IF NOT EXISTS vector;"
+    ```
 - Option 2:
     - Go to `http://localhost:8002/` and run a extension query:
         - `create extension if not exists vector;`
