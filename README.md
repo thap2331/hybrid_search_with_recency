@@ -1,6 +1,11 @@
 # Hybrid search with recency
 - 
 
+# What do you need
+- [Docker](https://docs.docker.com/get-started/get-docker/)
+- Embedding access
+    - AWS bedrock or OpenAI api key
+
 ## Spin up containers
 - Start by spinning up the containers. You can do `docker compose up -d`. It will start postgres db in docker, worker instance from which we can run various commands, and  pgweb which will allow us to see the data visually as well as run queries as needed.
 
