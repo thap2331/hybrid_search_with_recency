@@ -125,4 +125,5 @@ Compared to the results above in hybrid search, the recency pulls up most recent
 
 
 #### Credits where it deserves
-- 
+- [supabase](https://supabase.com/docs/guides/ai/hybrid-search)
+- [anyblockers](https://anyblockers.com/posts/postgres-as-a-search-engine#table-with-four-legs)
