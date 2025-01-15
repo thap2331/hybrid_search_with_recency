@@ -1,0 +1,59 @@
+services:
+  pg_database:
+    container_name: pg_container
+    image: pgvector/pgvector:pg16 #postgres:16.2
+    restart: on-failure
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: vectordb
+    volumes:
+       - datavol:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - datanet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d vectordb -p 5432 -h pg_container"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  worker:
+    container_name: worker
+    build:
+      context: .
+      dockerfile: Dockerfile.search
+    image: worker
+    env_file:
+      - .env
+    networks:
+      - datanet
+    depends_on:
+      pg_database:
+        condition: "service_healthy"
+    volumes:
+      - .:/app
+      - ~/.aws:/root/.aws
+
+  pgweb:
+    image: sosedoff/pgweb
+    networks:
+      - datanet
+    environment:
+      - PGWEB_DATABASE_URL=postgres://postgres:pass@pg_container:5432/vectordb?sslmode=disable
+    depends_on:
+      pg_database:
+        condition: "service_healthy"
+    ports:
+      - target: 8081
+        published: 8002
+
+volumes:
+  datavol:
+    name: datavol
+
+networks:
+  datanet:
+    name: datanet
+    driver: bridge
