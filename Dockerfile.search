@@ -1,0 +1,13 @@
+# use from python
+FROM python:3.11
+
+# set the working directory in the container
+WORKDIR /app
+#Install the required packages
+COPY ./requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY ./Utils/ ./Utils/
+
+# keep it open
+CMD ["tail", "-f", "/dev/null"]
