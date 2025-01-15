@@ -1,6 +1,12 @@
 ----------------- Fuzzy Search -----------------
 create extension if not exists pg_trgm;
-create index if not exists idx_documents_title_trgm on table1 using gin (topic gin_trgm_ops);
+
+-- Create an index for the full-text search
+create index if not exists idx_table1_product_fts on table1 using gin(fts_product);
+create index if not exists idx_table1_feature_fts on table1 using gin(fts_feature);
+
+-- Create an index for the fuzzy search
+create index if not exists idx_documents_topic_trgm on table1 using gin (topic gin_trgm_ops);
 
 -- fuzzy search
 create or replace function hybrid_search(
@@ -39,16 +45,16 @@ with fuzzy as (
     from table1
     where topic % query_text
     order by rank_ix
-    limit least(match_count, 30)
+    limit least(match_count, 60)
 ),
 fts_product as (
     select id,
            ts_rank_cd(fts_product, websearch_to_tsquery(query_text)) as rank_score,
-           row_number() over (order by ts_rank_cd(fts_product, websearch_to_tsquery(query_text)) desc) as rank_ix
+           row_number() over(order by ts_rank_cd(fts_product, websearch_to_tsquery(query_text)) desc) as rank_ix
     from table1
     where fts_product @@ websearch_to_tsquery(query_text)
     order by rank_ix
-    limit least(match_count, 30)
+    limit least(match_count, 60)
 ),
 fts_feature as (
     select
@@ -60,17 +66,17 @@ fts_feature as (
     where
         fts_feature @@ websearch_to_tsquery(query_text)
     order by rank_ix
-    limit least(match_count, 30)
+    limit least(match_count, 60)
 ),
 semantic as (
     select
         id,
         1 - (content_embedding <=> query_embedding) as cosine_similarity,
-        row_number() over (order by content_embedding <#> query_embedding) as rank_ix
+        row_number() over(order by content_embedding <=> query_embedding) as rank_ix
     from
         table1
     order by rank_ix
-    limit least(match_count, 30)
+    limit least(match_count, 60)
 )
 select
     table1.*,
@@ -89,8 +95,8 @@ from
     fuzzy
     full outer join fts_feature on fuzzy.id = fts_feature.id
     full outer join fts_product on coalesce(fuzzy.id, fts_feature.id) = fts_product.id
-    full outer join semantic on coalesce(fuzzy.id, fts_feature.id) = semantic.id
-    join table1 on coalesce(fuzzy.id, fts_feature.id, semantic.id) = table1.id
+    full outer join semantic on coalesce(fuzzy.id, fts_feature.id, fts_product.id) = semantic.id
+    join table1 on coalesce(fuzzy.id, fts_feature.id, fts_product.id, semantic.id) = table1.id
 order by combined_rank desc
 limit least(match_count, 30)
 $$;

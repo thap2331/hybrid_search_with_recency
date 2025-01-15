@@ -1,5 +1,5 @@
 # Hybrid Search with Recency
-- This repository offers a comprehensive setup for implementing a hybrid search system that emphasizes recency in search results. In many real-world scenarios, retrieving the most recent information is crucial, especially in dynamic domains like news, social media, or stock market data. This system is designed to balance relevance and freshness, ensuring that users receive the latest and most pertinent results.
+This repository offers a comprehensive setup for implementing a hybrid search system that emphasizes recency in search results. In many real-world scenarios, retrieving the most recent information is crucial, especially in dynamic domains like news, social media, or stock market data. This system is designed to balance relevance and freshness, ensuring that users receive the latest and most pertinent results.
 
 The solution leverages PostgreSQL's pgvector extension, which allows for efficient handling of vector data within the database. By integrating vector search capabilities directly into PostgreSQL, this setup facilitates seamless interactions with vector databases
 
@@ -8,8 +8,10 @@ The solution leverages PostgreSQL's pgvector extension, which allows for efficie
 Before you begin, ensure you have the following installed:
 
 - [Docker](https://docs.docker.com/get-started/get-docker/): To run the containers.
+- Create .env file. You can copy .env.example as .env
 - Embedding access:
   - AWS Bedrock or OpenAI API key for embedding generation.
+  - Note: If you would like to use OpenAI API for embedding generation, copy api key to .env file.
 
 ## Setup
 
@@ -44,11 +46,9 @@ Ingest your data into the PostgreSQL database using the provided Python script.
 docker exec -t worker bash -c "python ./search/ingest-to-pg.py -r prod"
 ```
 
-## See data
-
 ### Create Functions
 
-Count the number of functions in the public namespace to verify setup.
+First, count the number of functions in the public namespace to verify setup.
 
 ```sh
 docker exec -t pg_container psql -U postgres -d vectordb -c "SELECT COUNT(*) FROM pg_proc WHERE pronamespace = 'public'::regnamespace;"
@@ -68,12 +68,29 @@ docker cp ./search/hybrid-retrieval.sql pg_container:/home/hybrid-retrieval.sql 
 
 Run the SQL files to add the necessary functions for hybrid and combo retrieval.
 
+Hybrid retrieval function
+
 ```sh
 docker exec -t pg_container psql -U postgres -d vectordb -f /home/hybrid-retrieval.sql
 ```
 
+Now, check count the number of functions in the public namespace to verify setup.
+
+```sh
+docker exec -t pg_container psql -U postgres -d vectordb -c "SELECT COUNT(*) FROM pg_proc WHERE pronamespace = 'public'::regnamespace;"
+```
+
+Combo retrieval function
+
 ```sh
 docker exec -t pg_container psql -U postgres -d vectordb -f /home/combo-retrieval.sql
+```
+
+
+Optional: Check count the number of functions again in the public namespace to verify if function is added.
+
+```sh
+docker exec -t pg_container psql -U postgres -d vectordb -c "SELECT COUNT(*) FROM pg_proc WHERE pronamespace = 'public'::regnamespace;"
 ```
 
 
@@ -89,3 +106,14 @@ docker exec -t worker bash -c "python ./search/search.py -c"
 ```sh
 docker exec -t worker bash -c "python ./search/search.py -h"
 ```
+
+### Reset
+
+Remove all docker containers along with data ingested in postgres database
+
+```sh
+docker compose down --volumes
+```
+
+#### Credits where it deserves
+- 

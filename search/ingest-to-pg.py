@@ -7,7 +7,7 @@ argparser = argparse.ArgumentParser()
 argparser.add_argument('--runmode','-r', help='readlimit')
 args = argparser.parse_args()
 
-from embeddingsaws import AWSEmbeddings
+from embeddings import AWSEmbeddings, OPENAIEmbeddings
 from Utils.utils import DateUtils
 from datetime import datetime
 
@@ -78,7 +78,8 @@ cur = conn.cursor()
 cur.execute(create_table)
 conn.commit()
 
-embed = AWSEmbeddings()
+awsembed = AWSEmbeddings()
+openaiembed = OPENAIEmbeddings()
 dateutils = DateUtils()
 read_data = ReadData()
 
@@ -90,8 +91,6 @@ def read_data_file():
     for i in all_data_read:
         date = dateutils.convert_str_to_date(json.loads(i)['timestamp'])
         if date > datetime(2015, 1, 1):
-            # i = json.loads(i)
-            # print(f"\nheadline, {i['headline']}")
             all_data.append(i)
 
     return all_data
@@ -116,7 +115,7 @@ def write_to_db(data):
         topic = dict_data['topic']
         pub_date = dict_data['timestamp']
         age_category = dict_data['age_category']
-        content_embedding = embed.get_embedding(content)
+        content_embedding = openaiembed.get_embedding(content)
         data_to_insert = (id, company, product, feature, location, topic, pub_date, content, age_category, content_embedding)
         postgres_insert_query = """INSERT INTO table1 (id, company, product, feature, location, topic, pub_date, content, age_category, content_embedding) VALUES (%s, %s, %s, %s, %s, %s,  %s, %s, %s, %s)"""
         record_to_insert = (data_to_insert)

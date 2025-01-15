@@ -5,7 +5,7 @@ from langchain.text_splitter import CharacterTextSplitter
 
 from Utils.utils import ReadData
 
-client = OpenAI()
+openaiclient = OpenAI()
 
 
 #Create the connection to Bedrock
@@ -22,9 +22,8 @@ bedrock_runtime = boto3.client(
 
 class OPENAIEmbeddings:
 
-    def get_embedding(self, text, model="text-embedding-3-large"):
-        text = text.replace("\n", " ")
-        return client.embeddings.create(input = [text], model=model).data[0].embedding
+    def get_embedding(self, data, model="text-embedding-3-large"):
+        return openaiclient.embeddings.create(input = data, model=model, dimensions=1536).data[0].embedding
 
 class AWSEmbeddings:
     

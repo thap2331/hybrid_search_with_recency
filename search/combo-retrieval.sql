@@ -1,9 +1,13 @@
------------------ vector -----------------
-create extension if not exists vector;
-
 ----------------- Fuzzy Search -----------------
 create extension if not exists pg_trgm;
-create index if not exists idx_documents_title_trgm on table1 using gin (topic gin_trgm_ops);
+
+-- Create an index for the full-text search
+create index if not exists idx_table1_product_fts_combo on table1 using gin(fts_product);
+create index if not exists idx_table1_feature_fts_combo on table1 using gin(fts_feature);
+
+-- Create an index for the fuzzy search
+create index if not exists idx_documents_topic_trgm_combo on table1 using gin (topic gin_trgm_ops);
+
 
 -- fuzzy search
 create or replace function combo_search(
