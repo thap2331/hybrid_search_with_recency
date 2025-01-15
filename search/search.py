@@ -4,14 +4,13 @@ sys.path.insert(0, '.')
 import argparse
 import psycopg2
 from Utils.utils import PGDBWork
-from embeddingsaws import AWSEmbeddings
+from embeddings import AWSEmbeddings
 
 parser = argparse.ArgumentParser(description='Search options', add_help=False)
 parser.add_argument('-c', '--combo', action='store_true', help='Perform combo search')
 parser.add_argument('-h', '--hybrid', action='store_true', help='Perform hybrid search')
 args = parser.parse_args()
 
-print('all args:', args)
 if args.combo:
     print("Performing hybrid search with recency...")
     sql_query = """
@@ -37,9 +36,12 @@ cursor = conn.cursor()
 create_embeddings = AWSEmbeddings()
 
 # Your query embedding
+query="AI assistant"
+query="AI assistant"
 query="clean energy solution"
+query="clean"
 query_embedding = create_embeddings.get_embedding(query) #np.random.rand(1536).tolist()  # Replace with your actual query embedding
-print('\n',query,query_embedding[0:5],'\n')
+print('\nquery:',query,'\n')
 
 # Query to find the most similar documents (e.g., top 5 closest vectors)
 cursor.execute(
@@ -51,6 +53,7 @@ cursor.execute(
 results = cursor.fetchall()
 
 # Print the results
+print("all results count: ", len(results))
 for row in results:
     # print(row,'\n')
     print(f"ID: {row[0]}, company: {row[1]}, product: {row[2]}, fts_product: {row[3]}, feature: {row[4]}, fts_feature: {row[5]}, location: {row[6]}, content: {row[7]}, topic: {row[8]}, pub_date: {row[9]}, age_category: {row[10]}, combined_rank: {row[12]}, rankings: {row[13]}")
