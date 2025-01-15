@@ -54,7 +54,7 @@ First, count the number of functions in the public namespace to verify setup.
 docker exec -t pg_container psql -U postgres -d vectordb -c "SELECT COUNT(*) FROM pg_proc WHERE pronamespace = 'public'::regnamespace;"
 ```
 
-### Copy SQL Files
+#### Copy SQL Files
 
 Copy the SQL files for hybrid and combo retrieval functions into the PostgreSQL container.
 
@@ -64,7 +64,7 @@ docker cp ./search/hybrid-retrieval.sql pg_container:/home/hybrid-retrieval.sql 
 
 
 
-### Execute SQL Files
+#### Execute SQL Files
 
 Run the SQL files to add the necessary functions for hybrid and combo retrieval.
 
@@ -114,6 +114,15 @@ Remove all docker containers along with data ingested in postgres database
 ```sh
 docker compose down --volumes
 ```
+
+#### Compare results
+1. Hybrid search result
+![alt text](image.png)
+
+2. Hybrid search with recency result 
+Compared to the results above in hybrid search, the recency pulls up most recent results (see id 35).
+![alt text](image-1.png)
+
 
 #### Credits where it deserves
 - 
